@@ -4,6 +4,7 @@ const VocabularyExtractor = require('../lib/vocabularyExtractor');
 const AppwriteClient = require('../lib/appwriteClient');
 
 module.exports = async (req, res) => {
+    // Set timeout headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     
@@ -12,6 +13,7 @@ module.exports = async (req, res) => {
     }
 
     console.log('🚀 Starting Korean vocabulary collection...');
+    const startTime = Date.now();
 
     try {
         const scraper = new KoreanScraper();
@@ -20,18 +22,19 @@ module.exports = async (req, res) => {
         const appwrite = new AppwriteClient();
 
         console.log('📰 Step 1: Scraping Korean news...');
-        const rawWords = await scraper.scrapeVocabulary(5);
+        const rawWords = await scraper.scrapeVocabulary(3);  // Reduced from 5
 
         if (rawWords.length === 0) {
             return res.status(200).json({
                 success: false,
                 message: 'No Korean words found',
-                added: 0
+                added: 0,
+                duration: `${Date.now() - startTime}ms`
             });
         }
 
         console.log('📚 Step 2: Selecting best vocabulary...');
-        const selectedWords = extractor.selectBestWords(rawWords, 15);
+        const selectedWords = extractor.selectBestWords(rawWords, 10);  // Reduced from 15
 
         console.log('🌐 Step 3: Translating to Japanese...');
         const translations = await translator.batchTranslate(selectedWords);
@@ -51,8 +54,9 @@ module.exports = async (req, res) => {
         const added = results.filter(r => r.status === 'added').length;
         const duplicates = results.filter(r => r.status === 'duplicate').length;
         const errors = results.filter(r => r.status === 'error').length;
+        const duration = `${Date.now() - startTime}ms`;
 
-        console.log(`✅ Complete! Added: ${added}, Duplicates: ${duplicates}, Errors: ${errors}`);
+        console.log(`✅ Complete! Added: ${added}, Duplicates: ${duplicates}, Errors: ${errors}, Duration: ${duration}`);
 
         return res.status(200).json({
             success: true,
@@ -62,7 +66,8 @@ module.exports = async (req, res) => {
             added,
             duplicates,
             errors,
-            results
+            duration,
+            results: results.slice(0, 5)  // Only return first 5 for brevity
         });
 
     } catch (error) {
@@ -71,7 +76,8 @@ module.exports = async (req, res) => {
         return res.status(500).json({
             success: false,
             error: error.message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            duration: `${Date.now() - startTime}ms`
         });
     }
 };
