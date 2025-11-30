@@ -12,7 +12,7 @@
   "crons": [
     {
       "path": "/api/scrape-korean",
-      "schedule": "0 9,21 * * *"
+      "schedule": "0 9 * * *"
     }
   ]
 }
