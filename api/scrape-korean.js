@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
         const appwrite = new AppwriteClient();
 
         console.log('📰 Step 1: Scraping Korean news...');
-        const rawWords = await scraper.scrapeVocabulary(3);  // Reduced from 5
+        const rawWords = await scraper.scrapeVocabulary(5);
 
         if (rawWords.length === 0) {
             return res.status(200).json({
@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
         }
 
         console.log('📚 Step 2: Selecting best vocabulary...');
-        const selectedWords = extractor.selectBestWords(rawWords, 10);  // Reduced from 15
+        const selectedWords = extractor.selectBestWords(rawWords, 15);
 
         console.log('🌐 Step 3: Translating to Japanese...');
         const translations = await translator.batchTranslate(selectedWords);
