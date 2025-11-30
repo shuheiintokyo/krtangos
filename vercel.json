@@ -1,9 +1,8 @@
 {
   "version": 2,
   "functions": {
-    "api/scrape-korean.js": {
-      "memory": 1024,
-      "maxDuration": 30
+    "api/*.js": {
+      "maxDuration": 10
     }
   },
   "env": {
@@ -12,7 +11,7 @@
   "crons": [
     {
       "path": "/api/scrape-korean",
-      "schedule": "0 9 * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
