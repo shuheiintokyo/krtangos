@@ -1,0 +1,33 @@
+name: Daily Korean Vocabulary Scrape
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day (9 AM JST)
+    - cron: '0 0 * * *'
+  
+  # Allows manual trigger
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger KRTANGOS Scraper
+        run: |
+          echo "🚀 Triggering Korean vocabulary scraper..."
+          
+          response=$(curl -s -o response.txt -w "%{http_code}" \
+            -X GET \
+            --max-time 300 \
+            https://krtangos-theta.vercel.app/api/scrape-korean)
+          
+          echo "📊 Response Code: $response"
+          cat response.txt
+          
+          if [ "$response" -eq 200 ]; then
+            echo "✅ Success! Korean vocabulary updated."
+          else
+            echo "❌ Failed with status code: $response"
+            exit 1
+          fi
