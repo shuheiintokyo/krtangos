@@ -2,16 +2,10 @@
   "version": 2,
   "functions": {
     "api/*.js": {
-      "maxDuration": 10
+      "maxDuration": 60
     }
   },
   "env": {
     "APPWRITE_ENDPOINT": "https://cloud.appwrite.io/v1"
-  },
-  "crons": [
-    {
-      "path": "/api/scrape-korean",
-      "schedule": "0 0 * * *"
-    }
-  ]
+  }
 }
