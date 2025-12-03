@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
         }
 
         console.log('📚 Step 2: Selecting best vocabulary...');
-        const selectedWords = extractor.selectBestWords(rawWords, 15);
+        const selectedWords = extractor.selectBestWords(rawWords, 10);
 
         console.log('🌐 Step 3: Translating to Japanese...');
         const translations = await translator.batchTranslate(selectedWords);
