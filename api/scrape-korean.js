@@ -1,6 +1,6 @@
 const KoreanScraper = require('../lib/scraper');
 const Translator = require('../lib/translator');
-const VocabularyExtractor = require('../lib/vocabularyExtractor');
+const SentenceExtractor = require('../lib/sentenceExtractor');
 const AppwriteClient = require('../lib/appwriteClient');
 
 module.exports = async (req, res) => {
@@ -12,42 +12,42 @@ module.exports = async (req, res) => {
         return res.status(200).end();
     }
 
-    console.log('🚀 Starting Korean vocabulary collection...');
+    console.log('🚀 Starting Korean sentence collection...');
     const startTime = Date.now();
 
     try {
         const scraper = new KoreanScraper();
         const translator = new Translator();
-        const extractor = new VocabularyExtractor();
+        const extractor = new SentenceExtractor();
         const appwrite = new AppwriteClient();
 
-        console.log('📰 Step 1: Scraping Korean news...');
-        const rawWords = await scraper.scrapeVocabulary(5);
+        console.log('📰 Step 1: Scraping Korean news sentences...');
+        const rawSentences = await scraper.scrapeSentences(5); // Scrape 5 articles
 
-        if (rawWords.length === 0) {
+        if (rawSentences.length === 0) {
             return res.status(200).json({
                 success: false,
-                message: 'No Korean words found',
+                message: 'No Korean sentences found',
                 added: 0,
                 duration: `${Date.now() - startTime}ms`
             });
         }
 
-        console.log('📚 Step 2: Selecting best vocabulary...');
-        const selectedWords = extractor.selectBestWords(rawWords, 10);
+        console.log('📚 Step 2: Selecting best sentences...');
+        const selectedSentences = extractor.selectBestSentences(rawSentences, 10); // Select top 10
 
         console.log('🌐 Step 3: Translating to Japanese...');
-        const translations = await translator.batchTranslate(selectedWords);
+        const translations = await translator.batchTranslate(selectedSentences);
 
         console.log('💾 Step 4: Saving to database...');
         const results = [];
         const source = scraper.getSourceName();
 
-        for (let i = 0; i < selectedWords.length; i++) {
-            const korean = selectedWords[i];
+        for (let i = 0; i < selectedSentences.length; i++) {
+            const korean = selectedSentences[i];
             const japanese = translations[i];
 
-            const result = await appwrite.addVocabulary(korean, japanese, source);
+            const result = await appwrite.addSentence(korean, japanese, source);
             results.push(result);
         }
 
@@ -62,12 +62,12 @@ module.exports = async (req, res) => {
             success: true,
             timestamp: new Date().toISOString(),
             source: source,
-            wordsProcessed: selectedWords.length,
+            sentencesProcessed: selectedSentences.length,
             added,
             duplicates,
             errors,
             duration,
-            results: results.slice(0, 5)  // Only return first 5 for brevity
+            results: results.slice(0, 3)  // Only return first 3 for brevity
         });
 
     } catch (error) {
